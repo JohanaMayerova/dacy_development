@@ -1,0 +1,258 @@
+title: "Part-of-speech Tagging & Dependency Parsing (Universal Dependencies)"
+description: >
+  This project template lets you train a part-of-speech tagger,
+  morphologizer, lemmatizer and dependency parser from a [Universal
+  Dependencies](https://universaldependencies.org/) corpus. It takes care of
+  downloading the treebank, converting it to spaCy's format and training and
+  evaluating the model. The template uses the
+  [`UD_English-EWT`](https://github.com/UniversalDependencies/UD_English-EWT)
+  treebank by default, but you can swap it out for any other available
+  treebank. Just make sure to adjust the `lang` and treebank settings in the
+  variables below. Use `xx` for multi-language if no language-specific
+  tokenizer is available in spaCy. Note that multi-word tokens will be merged
+  together when the corpus is converted since spaCy does not support multi-word
+  token expansion.
+
+# Variables can be referenced across the project.yml using ${vars.var_name}
+vars:
+  config_small: "config_small"
+  lang: "da"
+  treebank: "UD_Danish-DDT"
+  cdt_ddt: "cdt_ddt"
+  train_name: "da_ddt-ud-train"
+  dev_name: "da_ddt-ud-dev"
+  test_name: "da_ddt-ud-test"
+  package_name: "cdt_ddt_dane_package"
+  package_version: "0.0.0"
+  gpu: -1
+# gpu so far is -1 (so cpu), when we figure out torch and cupy, I will change to 0
+
+# These are the directories that the project needs. The project CLI will make
+# sure that they always exist.
+directories: ["assets", "corpus", "training", "metrics", "configs", "packages"]
+
+assets:
+  - dest: "assets/${vars.treebank}"
+    git:
+      repo: "https://github.com/UniversalDependencies/${vars.treebank}"
+      branch: "master"
+      path: ""
+  - dest: "assets/dane.zip"
+    url: "http://danlp-downloads.alexandra.dk/datasets/ddt.zip"
+  - dest: "assets/dacoref.zip"
+    url: "http://danlp-downloads.alexandra.dk/datasets/dacoref.zip"
+
+workflows:
+  all:
+    - preprocess
+    - prepare_dane
+    - prepare_dacoref
+    - preprocess_dane
+    - preprocess_cdt
+    - combine
+    - train
+    - evaluate
+    - package
+  rest:
+    - preprocess_cdt
+    - combine
+    - train
+    - evaluate
+    - package
+
+commands:
+
+  # unzipping DaNe 
+  - name: prepare_dane
+    help: "Prepare DaNE data for preprocessing"
+    script:
+      - "unzip assets/dane.zip -d assets/dane"
+      - "mv assets/dane/ddt.train.conllu assets/dane/train.conllu"
+      - "mv assets/dane/ddt.test.conllu assets/dane/test.conllu"
+      - "mv assets/dane/ddt.dev.conllu assets/dane/dev.conllu"
+      - "rm assets/dane.zip"
+    deps:
+      - "assets/dane.zip"
+    outputs:
+      - "assets/dane/train.conllu"
+      - "assets/dane/dev.conllu"
+      - "assets/dane/test.conllu"
+
+# prep dacoref
+# the combine.py script expects the conllu file, but the json files are also needed for evaluation, so keeping them both
+
+  - name: prepare_dacoref
+    help: "Prepare DaCoRef data for preprocessing"
+    script:
+      - "unzip assets/dacoref.zip -d assets/dacoref"
+      - "rm assets/dacoref.zip"
+    deps:
+      - "assets/dacoref.zip"
+    outputs:
+      - "assets/dacoref/CDT_coref.conllu"
+      - "assets/dacoref/train.json"
+      - "assets/dacoref/dev.json"
+      - "assets/dacoref/test.json"
+
+# DaNe preprocessing 
+  - name: preprocess_dane
+    help: "Convert the data to spaCy's format"
+    script:
+      - "mkdir -p corpus/dane"
+      - >-
+        python -m spacy convert
+        assets/dane/train.conllu 
+        corpus/dane/ 
+        --converter conllu 
+        --merge-subtokens
+      - >-
+        python -m spacy convert 
+        assets/dane/dev.conllu 
+        corpus/dane/ 
+        --converter conllu 
+        --merge-subtokens
+      - >-
+        python -m spacy convert 
+        assets/dane/test.conllu
+        corpus/dane/
+        --converter conllu 
+        --merge-subtokens
+    deps:
+      - "assets/dane/train.conllu"
+      - "assets/dane/dev.conllu"
+      - "assets/dane/test.conllu"
+    outputs:
+      - "corpus/dane/train.spacy"
+      - "corpus/dane/dev.spacy"
+      - "corpus/dane/test.spacy"
+
+# DDT treebank 
+
+  - name: preprocess
+    help: "Convert the data to spaCy's format"
+    script:
+      - "mkdir -p corpus/${vars.treebank}"
+      - >-
+        python -m spacy convert
+        assets/${vars.treebank}/${vars.train_name}.conllu 
+        corpus/${vars.treebank}/ 
+        --converter conllu 
+        --merge-subtokens
+      - >-
+        python -m spacy convert 
+        assets/${vars.treebank}/${vars.dev_name}.conllu 
+        corpus/${vars.treebank}/ 
+        --converter conllu 
+        --merge-subtokens
+      - >-
+        python -m spacy convert 
+        assets/${vars.treebank}/${vars.test_name}.conllu
+        corpus/${vars.treebank}/
+        --converter conllu 
+        --merge-subtokens
+      - "mv corpus/${vars.treebank}/${vars.train_name}.spacy corpus/${vars.treebank}/train.spacy"
+      - "mv corpus/${vars.treebank}/${vars.dev_name}.spacy corpus/${vars.treebank}/dev.spacy"
+      - "mv corpus/${vars.treebank}/${vars.test_name}.spacy corpus/${vars.treebank}/test.spacy"
+    deps:
+      - "assets/${vars.treebank}/${vars.train_name}.conllu"
+      - "assets/${vars.treebank}/${vars.dev_name}.conllu"
+      - "assets/${vars.treebank}/${vars.test_name}.conllu"
+    outputs:
+      - "corpus/${vars.treebank}/train.spacy"
+      - "corpus/${vars.treebank}/dev.spacy"
+      - "corpus/${vars.treebank}/test.spacy"
+
+  - name: preprocess_cdt
+    help: "Making compatible cdt splits for combining with ddt_dane"
+    script:
+      - >-
+        python scripts/compatible_cdt_splits.py
+    deps:
+      - "assets/dacoref/CDT_coref.conllu"
+      - "assets/dacoref/CDT_train_ids.json"
+      - "assets/dacoref/CDT_dev_ids.json"
+      - "assets/dacoref/CDT_test_ids.json"
+    outputs:
+      - assets/CDT_ddt_compatible_splits.json
+
+
+# combine
+  - name: combine
+    help: "Combine ddt_dane and cdt together"
+    script:
+    - >-
+      python scripts/combine.py
+    deps:
+      #cdt
+      - assets/CDT_ddt_compatible_splits.json
+      # ddt
+      - "corpus/${vars.treebank}/train.spacy"
+      - "corpus/${vars.treebank}/dev.spacy"
+      - "corpus/${vars.treebank}/test.spacy"
+      # dane
+      - "corpus/dane/train.spacy"
+      - "corpus/dane/dev.spacy"
+      - "corpus/dane/test.spacy"
+    outputs:
+      - "corpus/cdt_ddt/data.spacy"
+      - "corpus/cdt_ddt/test.spacy"
+      - "corpus/cdt_ddt/dev.spacy"
+      - "corpus/cdt_ddt/train.spacy"
+
+      
+
+  - name: train
+    help: "Train cdt_ddt"
+    script:
+      - >-
+        python -m spacy train 
+        configs/${vars.config_small}.cfg
+        --output training/cdt_ddt
+        --gpu-id ${vars.gpu} 
+        --paths.train corpus/cdt_ddt/train.spacy 
+        --paths.dev corpus/cdt_ddt/dev.spacy 
+        --nlp.lang=${vars.lang}
+    deps:
+      - "corpus/cdt_ddt/train.spacy"
+      - "corpus/cdt_ddt/dev.spacy"
+      - "configs/${vars.config_small}.cfg"
+    outputs:
+      - "training/cdt_ddt/model-best"
+
+  - name: evaluate
+    help: "Evaluate on the test data and save the metrics"
+    script:
+      - >-
+        python -m spacy evaluate 
+        ./training/cdt_ddt/model-best 
+        ./corpus/cdt_ddt/test.spacy 
+        --output ./metrics/cdt_ddt.json 
+        --gpu-id ${vars.gpu}
+    deps:
+      - "training/cdt_ddt/model-best"
+      - "corpus/cdt_ddt/test.spacy"
+    outputs:
+      - "metrics/cdt_ddt.json"
+
+  
+
+  - name: package
+    help: "Package the trained model so it can be installed"
+    script:
+      - >-
+        python -m spacy package 
+        training/cdt_ddt/model-best packages 
+        --name ${vars.package_name} 
+        --version ${vars.package_version}
+        --force
+    deps:
+      - "training/cdt_ddt/model-best"
+    outputs_no_cache:
+      - "packages/${vars.lang}_${vars.package_name}-${vars.package_version}/dist/en_${vars.package_name}-${vars.package_version}.tar.gz"
+
+  - name: clean
+    help: "Remove intermediate files"
+    script:
+      - "rm -rf training/*"
+      - "rm -rf metrics/*"
+      - "rm -rf corpus/*"

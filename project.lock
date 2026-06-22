@@ -1,0 +1,340 @@
+preprocess:
+  cmd: python -m weasel run preprocess
+  script:
+    - mkdir -p corpus/UD_Danish-DDT
+    - python -m spacy convert assets/UD_Danish-DDT/da_ddt-ud-train.conllu  corpus/UD_Danish-DDT/  --converter
+      conllu  --merge-subtokens
+    - python -m spacy convert  assets/UD_Danish-DDT/da_ddt-ud-dev.conllu  corpus/UD_Danish-DDT/  --converter
+      conllu  --merge-subtokens
+    - python -m spacy convert  assets/UD_Danish-DDT/da_ddt-ud-test.conllu corpus/UD_Danish-DDT/
+      --converter conllu  --merge-subtokens
+    - mv corpus/UD_Danish-DDT/da_ddt-ud-train.spacy corpus/UD_Danish-DDT/train.spacy
+    - mv corpus/UD_Danish-DDT/da_ddt-ud-dev.spacy corpus/UD_Danish-DDT/dev.spacy
+    - mv corpus/UD_Danish-DDT/da_ddt-ud-test.spacy corpus/UD_Danish-DDT/test.spacy
+  deps:
+    - path: assets/UD_Danish-DDT/da_ddt-ud-train.conllu
+      md5: c80b9a9eb7677ea3dc56ae87056b5454
+    - path: assets/UD_Danish-DDT/da_ddt-ud-dev.conllu
+      md5: 1feb5aa4179b831f1d01e827edcc3a30
+    - path: assets/UD_Danish-DDT/da_ddt-ud-test.conllu
+      md5: f767e3584fd04fed55a363ec421a851b
+  outs:
+    - path: corpus/UD_Danish-DDT/train.spacy
+      md5: 4cac483eb7b6b680fad046ba7121bd27
+    - path: corpus/UD_Danish-DDT/dev.spacy
+      md5: 7374ef9932a6125544f4bf495bc1182d
+    - path: corpus/UD_Danish-DDT/test.spacy
+      md5: b90dd42f6bd7abd64cd7049128817329
+train:
+  cmd: python -m weasel run train
+  script:
+    - python -m spacy train  configs/ud.cfg --output training/UD_Danish-DDT --gpu-id
+      -1  --paths.train corpus/UD_Danish-DDT/train.spacy  --paths.dev corpus/UD_Danish-DDT/dev.spacy  --nlp.lang=da
+  deps:
+    - path: corpus/UD_Danish-DDT/train.spacy
+      md5: d7bc010147ca3a655362da21d5d1fbe8
+    - path: corpus/UD_Danish-DDT/dev.spacy
+      md5: 34ed9c1a53537d6fe5fb8522f9acd17e
+    - path: configs/ud.cfg
+      md5: adfb772f77ea29883e1d04d81dc0b127
+  outs:
+    - path: training/UD_Danish-DDT/model-best
+      md5: 4e5b0e0681d419aeba8274439d5104ae
+evaluate:
+  cmd: python -m weasel run evaluate
+  script:
+    - python -m spacy evaluate  ./training/UD_Danish-DDT/model-best  ./corpus/UD_Danish-DDT/test.spacy  --output
+      ./metrics/UD_Danish-DDT.json  --gpu-id -1
+  deps:
+    - path: training/UD_Danish-DDT/model-best
+      md5: 4e5b0e0681d419aeba8274439d5104ae
+    - path: corpus/UD_Danish-DDT/test.spacy
+      md5: da9f07fb74ee192c783087ac29ba6a3b
+  outs:
+    - path: metrics/UD_Danish-DDT.json
+      md5: b937f07f30446f060cc216f413d3b0e6
+package:
+  cmd: python -m weasel run package
+  script:
+    - python -m spacy package  training/UD_Danish-DDT/model-best packages  --name
+      ud_danish_ddt  --version 0.0.0 --force
+  deps:
+    - path: training/UD_Danish-DDT/model-best
+      md5: 4e5b0e0681d419aeba8274439d5104ae
+  outs:
+    - path: packages/da_ud_danish_ddt-0.0.0/dist/en_ud_danish_ddt-0.0.0.tar.gz
+      md5: null
+preprocess_ner:
+  cmd: python -m weasel run preprocess_ner
+  script:
+    - python conversion_scripts/dane_to_spacy.py
+  deps: []
+  outs:
+    - path: corpus/dane/train.spacy
+      md5: 1217a6bcc4b16089d38d8481825b3737
+    - path: corpus/dane/dev.spacy
+      md5: 5c0602d58efb3c9535949c9d0f4a0f5d
+    - path: corpus/dane/test.spacy
+      md5: 7f580aaf9cfb63a319bdf614a4e5b570
+train_ner:
+  cmd: python -m weasel run train_ner
+  script:
+    - python -m spacy train configs/ner.cfg --output training/dane --gpu-id -1 --paths.train
+      corpus/dane/train.spacy --paths.dev corpus/dane/dev.spacy --nlp.lang=da
+  deps:
+    - path: corpus/dane/train.spacy
+      md5: 1217a6bcc4b16089d38d8481825b3737
+    - path: corpus/dane/dev.spacy
+      md5: 5c0602d58efb3c9535949c9d0f4a0f5d
+    - path: configs/ner.cfg
+      md5: 895a3317286b97a79bda87bc8d1c9b49
+  outs:
+    - path: training/dane/model-best
+      md5: 216fc266dc6b55be9eb540530929db57
+evaluate_ner:
+  cmd: python -m weasel run evaluate_ner
+  script:
+    - python -m spacy evaluate ./training/dane/model-best ./corpus/dane/test.spacy
+      --output ./metrics/dane.json --gpu-id -1
+  deps:
+    - path: training/dane/model-best
+      md5: 216fc266dc6b55be9eb540530929db57
+    - path: corpus/dane/test.spacy
+      md5: 7f580aaf9cfb63a319bdf614a4e5b570
+  outs:
+    - path: metrics/dane.json
+      md5: f6f1519e03af9f7e4aad35efc499da2b
+package_ner:
+  cmd: python -m weasel run package_ner
+  script:
+    - python -m spacy package  training/dane/model-best packages  --name ner_dane  --version
+      0.0.0 --force
+  deps:
+    - path: training/dane/model-best
+      md5: 216fc266dc6b55be9eb540530929db57
+  outs:
+    - path: packages/da_ner_dane-0.0.0/dist/da_ner_dane-0.0.0.tar.gz
+      md5: bb95b256349f55a000563b817a506b22
+preprocess_joint:
+  cmd: python -m weasel run preprocess_joint
+  script:
+    - python conversion_scripts/add_dane_to_ddt.py
+  deps:
+    - path: corpus/UD_Danish-DDT/train.spacy
+      md5: d7bc010147ca3a655362da21d5d1fbe8
+    - path: corpus/UD_Danish-DDT/dev.spacy
+      md5: 34ed9c1a53537d6fe5fb8522f9acd17e
+    - path: corpus/UD_Danish-DDT/test.spacy
+      md5: da9f07fb74ee192c783087ac29ba6a3b
+    - path: corpus/dane/train.spacy
+      md5: 1217a6bcc4b16089d38d8481825b3737
+    - path: corpus/dane/dev.spacy
+      md5: 5c0602d58efb3c9535949c9d0f4a0f5d
+    - path: corpus/dane/test.spacy
+      md5: 7f580aaf9cfb63a319bdf614a4e5b570
+  outs:
+    - path: corpus/UD_Danish-DDT-with-dane/train.spacy
+      md5: 989e677920cf2228caf85df5a8aba02a
+    - path: corpus/UD_Danish-DDT-with-dane/dev.spacy
+      md5: 89217fb45483eda26283b70579d997df
+    - path: corpus/UD_Danish-DDT-with-dane/test.spacy
+      md5: a459dd636a600e45acb14ece395f5c2c
+train_joint:
+  cmd: python -m weasel run train_joint
+  script:
+    - python -m spacy train configs/joint.cfg --output training/ddt_dane_joint --gpu-id
+      -1 --paths.train corpus/ddt_dane_joint/train.spacy --paths.dev corpus/ddt_dane_joint/dev.spacy
+      --nlp.lang=da
+  deps:
+    - path: corpus/ddt_dane_joint/train.spacy
+      md5: 936c22c2ba7624da04512f5a6b2079cd
+    - path: corpus/ddt_dane_joint/dev.spacy
+      md5: 43fd2479578a4e3e1b78e2db6cc5db50
+    - path: configs/joint.cfg
+      md5: 5e389026f859b8daf3c51977dd561833
+  outs:
+    - path: training/ddt_dane_joint/model-best
+      md5: 6ffbf6a29cc6ba27e05d32d6a4428cbe
+evaluate_joint:
+  cmd: python -m weasel run evaluate_joint
+  script:
+    - python -m spacy evaluate ./training/ddt_dane_joint/model-best ./corpus/ddt_dane_joint/test.spacy
+      --output ./metrics/ddt_dane_joint.json --gpu-id -1
+  deps:
+    - path: training/ddt_dane_joint/model-best
+      md5: 6ffbf6a29cc6ba27e05d32d6a4428cbe
+    - path: corpus/ddt_dane_joint/test.spacy
+      md5: 824baf4cce960eb1a77f7599240fa322
+  outs:
+    - path: metrics/ddt_dane_joint.json
+      md5: 897e07c4959fba190934b387e887d492
+package_joint:
+  cmd: python -m weasel run package_joint
+  script:
+    - python -m spacy package  training/ddt_dane_joint/model-best packages        --name
+      ud_danish_ddt_dane  --version 0.0.0 --force
+  deps:
+    - path: training/ddt_dane_joint/model-best
+      md5: 6ffbf6a29cc6ba27e05d32d6a4428cbe
+  outs:
+    - path: packages/da_ud_danish_ddt_dane-0.0.0/dist/da_ud_danish_ddt_dane-0.0.0.tar.gz
+      md5: 8a04e3d1da48a6da90abbbeb8aca01af
+merge_dane_ddt:
+  cmd: python -m weasel run merge_dane_ddt
+  script:
+    - python scripts/dane_plus_preprocessing.py
+  deps:
+    - path: corpus/UD_Danish-DDT/train.spacy
+      md5: d7bc010147ca3a655362da21d5d1fbe8
+    - path: corpus/UD_Danish-DDT/dev.spacy
+      md5: 34ed9c1a53537d6fe5fb8522f9acd17e
+    - path: corpus/UD_Danish-DDT/test.spacy
+      md5: da9f07fb74ee192c783087ac29ba6a3b
+  outs:
+    - path: corpus/ddt_dane_joint/train.spacy
+      md5: 936c22c2ba7624da04512f5a6b2079cd
+    - path: corpus/ddt_dane_joint/dev.spacy
+      md5: 43fd2479578a4e3e1b78e2db6cc5db50
+    - path: corpus/ddt_dane_joint/test.spacy
+      md5: 824baf4cce960eb1a77f7599240fa322
+train_cdt_ddt:
+  cmd: python -m weasel run train_cdt_ddt
+  script:
+    - python -m spacy train configs/config_small.cfg --output training/cdt_ddt --gpu-id
+      -1 --paths.train corpus/cdt_ddt/train.spacy --paths.dev corpus/cdt_ddt/dev.spacy
+      --nlp.lang=da
+  deps:
+    - path: corpus/cdt_ddt/train.spacy
+      md5: 5ea2eaf1327b4d3aa2e99c54fc90c015
+    - path: corpus/cdt_ddt/dev.spacy
+      md5: 851a6dc5b6fd878bee255ff18cf24d84
+    - path: configs/config_small.cfg
+      md5: a28e58eafa955cc84c3d225a4c5d792d
+  outs:
+    - path: training/cdt_ddt/model-best
+      md5: bc4c3357b66bb8af4a320b7b9c306967
+evaluate_cdt_ddt:
+  cmd: python -m weasel run evaluate_cdt_ddt
+  script:
+    - python -m spacy evaluate ./training/cdt_ddt/model-best ./corpus/cdt_ddt/test.spacy
+      --output ./metrics/cdt_ddt.json --gpu-id -1
+  deps:
+    - path: training/cdt_ddt/model-best
+      md5: bc4c3357b66bb8af4a320b7b9c306967
+    - path: corpus/cdt_ddt/test.spacy
+      md5: 3482e823b6d17c9b733e78e055af1741
+  outs:
+    - path: metrics/cdt_ddt.json
+      md5: e29d7c28e701b152b6bc9f52f1efcd73
+package_cdt_ddt:
+  cmd: python -m weasel run package_cdt_ddt
+  script:
+    - python -m spacy package  training/cdt_ddt/model-best packages        --name
+      cdt_ddt  --version 0.0.0 --force
+  deps:
+    - path: training/cdt_ddt/model-best
+      md5: bc4c3357b66bb8af4a320b7b9c306967
+  outs:
+    - path: packages/da_cdt_ddt-0.0.0/dist/da_cdt_ddt-0.0.0.tar.gz
+      md5: d2dc53611169bc791ff61059a58ed26b
+prepare_dane:
+  cmd: python -m weasel run prepare_dane
+  script:
+    - unzip assets/dane.zip -d assets/dane
+    - mv assets/dane/ddt.train.conllu assets/dane/train.conllu
+    - mv assets/dane/ddt.test.conllu assets/dane/test.conllu
+    - mv assets/dane/ddt.dev.conllu assets/dane/dev.conllu
+    - rm assets/dane.zip
+  deps:
+    - path: assets/dane.zip
+      md5: null
+  outs:
+    - path: assets/dane/train.conllu
+      md5: 56ed5ceb42bc2c7c98403d20b4801db1
+    - path: assets/dane/dev.conllu
+      md5: 0c0057d571b284c855799a9b52b8288c
+    - path: assets/dane/test.conllu
+      md5: fcd2ac2d1a85fc2424483ca6a2ec38e6
+preprocess_dane:
+  cmd: python -m weasel run preprocess_dane
+  script:
+    - mkdir -p corpus/dane
+    - python -m spacy convert assets/dane/train.conllu  corpus/dane/  --converter
+      conllu  --merge-subtokens
+    - python -m spacy convert  assets/dane/dev.conllu  corpus/dane/  --converter conllu  --merge-subtokens
+    - python -m spacy convert  assets/dane/test.conllu corpus/dane/ --converter conllu  --merge-subtokens
+  deps:
+    - path: assets/dane/train.conllu
+      md5: 56ed5ceb42bc2c7c98403d20b4801db1
+    - path: assets/dane/dev.conllu
+      md5: 0c0057d571b284c855799a9b52b8288c
+    - path: assets/dane/test.conllu
+      md5: fcd2ac2d1a85fc2424483ca6a2ec38e6
+  outs:
+    - path: corpus/dane/train.spacy
+      md5: ee6efd3e2e25c7cd00c2de3d3223690d
+    - path: corpus/dane/dev.spacy
+      md5: 873fce5040aa2ee0f959ff89e83b3cea
+    - path: corpus/dane/test.spacy
+      md5: 2d8d318695d7e43766287a9f8e756d01
+prepare_dacoref:
+  cmd: python -m weasel run prepare_dacoref
+  script:
+    - unzip assets/dacoref.zip -d assets/dacoref
+    - rm assets/dacoref.zip
+  deps:
+    - path: assets/dacoref.zip
+      md5: null
+  outs:
+    - path: assets/dacoref/CDT_coref.conllu
+      md5: fb39f7836aabc72b65805847a89336d3
+    - path: assets/dacoref/train.json
+      md5: null
+    - path: assets/dacoref/dev.json
+      md5: null
+    - path: assets/dacoref/test.json
+      md5: null
+preprocess_cdt:
+  cmd: python -m weasel run preprocess_cdt
+  script:
+    - python scripts/compatible_cdt_splits.py
+  deps:
+    - path: assets/dacoref/CDT_coref.conllu
+      md5: fb39f7836aabc72b65805847a89336d3
+    - path: assets/dacoref/CDT_train_ids.json
+      md5: 6c7ca5df88ceac49b1fa40ca53ad6b6b
+    - path: assets/dacoref/CDT_dev_ids.json
+      md5: c75a12e06d2f530374fff3b52e7b959a
+    - path: assets/dacoref/CDT_test_ids.json
+      md5: 7416eca44cb88fdd2906bd23fafec7db
+  outs:
+    - path: assets/CDT_ddt_compatible_splits.json
+      md5: b47e7807901ff26bb609ecc1fe2285a2
+combine:
+  cmd: python -m weasel run combine
+  script:
+    - python scripts/combine.py
+  deps:
+    - path: assets/CDT_ddt_compatible_splits.json
+      md5: b47e7807901ff26bb609ecc1fe2285a2
+    - path: corpus/UD_Danish-DDT/train.spacy
+      md5: 4cac483eb7b6b680fad046ba7121bd27
+    - path: corpus/UD_Danish-DDT/dev.spacy
+      md5: 7374ef9932a6125544f4bf495bc1182d
+    - path: corpus/UD_Danish-DDT/test.spacy
+      md5: b90dd42f6bd7abd64cd7049128817329
+    - path: corpus/dane/train.spacy
+      md5: ee6efd3e2e25c7cd00c2de3d3223690d
+    - path: corpus/dane/dev.spacy
+      md5: 873fce5040aa2ee0f959ff89e83b3cea
+    - path: corpus/dane/test.spacy
+      md5: 2d8d318695d7e43766287a9f8e756d01
+  outs:
+    - path: corpus/cdt_ddt/data.spacy
+      md5: 57322311250071779b692529a3e0e391
+    - path: corpus/cdt_ddt/test.spacy
+      md5: 3482e823b6d17c9b733e78e055af1741
+    - path: corpus/cdt_ddt/dev.spacy
+      md5: 851a6dc5b6fd878bee255ff18cf24d84
+    - path: corpus/cdt_ddt/train.spacy
+      md5: 5ea2eaf1327b4d3aa2e99c54fc90c015
