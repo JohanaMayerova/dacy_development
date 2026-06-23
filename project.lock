@@ -28,41 +28,41 @@ preprocess:
 train:
   cmd: python -m weasel run train
   script:
-    - python -m spacy train  configs/ud.cfg --output training/UD_Danish-DDT --gpu-id
-      -1  --paths.train corpus/UD_Danish-DDT/train.spacy  --paths.dev corpus/UD_Danish-DDT/dev.spacy  --nlp.lang=da
+    - python -m spacy train  configs/config_small.cfg --output training/cdt_ddt --gpu-id
+      -1  --paths.train corpus/cdt_ddt/train.spacy  --paths.dev corpus/cdt_ddt/dev.spacy  --nlp.lang=da
   deps:
-    - path: corpus/UD_Danish-DDT/train.spacy
-      md5: d7bc010147ca3a655362da21d5d1fbe8
-    - path: corpus/UD_Danish-DDT/dev.spacy
-      md5: 34ed9c1a53537d6fe5fb8522f9acd17e
-    - path: configs/ud.cfg
-      md5: adfb772f77ea29883e1d04d81dc0b127
+    - path: corpus/cdt_ddt/train.spacy
+      md5: 5ea2eaf1327b4d3aa2e99c54fc90c015
+    - path: corpus/cdt_ddt/dev.spacy
+      md5: 851a6dc5b6fd878bee255ff18cf24d84
+    - path: configs/config_small.cfg
+      md5: 7fdc4cc6932e4b812be1e28bea2dd1c1
   outs:
-    - path: training/UD_Danish-DDT/model-best
-      md5: 4e5b0e0681d419aeba8274439d5104ae
+    - path: training/cdt_ddt/model-best
+      md5: bc4c3357b66bb8af4a320b7b9c306967
 evaluate:
   cmd: python -m weasel run evaluate
   script:
-    - python -m spacy evaluate  ./training/UD_Danish-DDT/model-best  ./corpus/UD_Danish-DDT/test.spacy  --output
-      ./metrics/UD_Danish-DDT.json  --gpu-id -1
+    - python -m spacy evaluate  ./training/cdt_ddt/model-best  ./corpus/cdt_ddt/test.spacy  --output
+      ./metrics/cdt_ddt.json  --gpu-id -1
   deps:
-    - path: training/UD_Danish-DDT/model-best
-      md5: 4e5b0e0681d419aeba8274439d5104ae
-    - path: corpus/UD_Danish-DDT/test.spacy
-      md5: da9f07fb74ee192c783087ac29ba6a3b
+    - path: training/cdt_ddt/model-best
+      md5: bc4c3357b66bb8af4a320b7b9c306967
+    - path: corpus/cdt_ddt/test.spacy
+      md5: 3482e823b6d17c9b733e78e055af1741
   outs:
-    - path: metrics/UD_Danish-DDT.json
-      md5: b937f07f30446f060cc216f413d3b0e6
+    - path: metrics/cdt_ddt.json
+      md5: a7cf14d569c9f96011919d4a85d166b7
 package:
   cmd: python -m weasel run package
   script:
-    - python -m spacy package  training/UD_Danish-DDT/model-best packages  --name
-      ud_danish_ddt  --version 0.0.0 --force
+    - python -m spacy package  training/cdt_ddt/model-best packages  --name cdt_ddt_dane_package  --version
+      0.0.0 --force
   deps:
-    - path: training/UD_Danish-DDT/model-best
-      md5: 4e5b0e0681d419aeba8274439d5104ae
+    - path: training/cdt_ddt/model-best
+      md5: bc4c3357b66bb8af4a320b7b9c306967
   outs:
-    - path: packages/da_ud_danish_ddt-0.0.0/dist/en_ud_danish_ddt-0.0.0.tar.gz
+    - path: packages/da_cdt_ddt_dane_package-0.0.0/dist/en_cdt_ddt_dane_package-0.0.0.tar.gz
       md5: null
 preprocess_ner:
   cmd: python -m weasel run preprocess_ner
