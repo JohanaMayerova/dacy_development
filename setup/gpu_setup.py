@@ -1,6 +1,7 @@
 # /// script
 # requires-python = ">=3.10"
 # dependencies = [
+#      "click",
 #     "spacy",
 #     "cupy-cuda13x[ctk]",
 #     "en-core-web-sm",

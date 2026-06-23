@@ -1,2 +1,0 @@
-spacy
-thinc==8.2.5
