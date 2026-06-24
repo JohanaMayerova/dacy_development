@@ -32,14 +32,14 @@ train:
       0  --paths.train corpus/cdt_ddt/train.spacy  --paths.dev corpus/cdt_ddt/dev.spacy  --nlp.lang=da
   deps:
     - path: corpus/cdt_ddt/train.spacy
-      md5: 5ea2eaf1327b4d3aa2e99c54fc90c015
+      md5: ffba8c8effa23d1a5583db151981cb77
     - path: corpus/cdt_ddt/dev.spacy
-      md5: 851a6dc5b6fd878bee255ff18cf24d84
+      md5: c765348a3b98a8de600230d1ad2ceba6
     - path: configs/config_small.cfg
-      md5: 7fdc4cc6932e4b812be1e28bea2dd1c1
+      md5: 83845df43a7b37c7ea172beab29ebac4
   outs:
     - path: training/cdt_ddt/model-best
-      md5: 8424957f5c209687f18edcb878684431
+      md5: 0fc33b13eccf29e5709c5e2e5357d44e
 evaluate:
   cmd: python -m weasel run evaluate
   script:
@@ -47,12 +47,12 @@ evaluate:
       ./metrics/cdt_ddt.json  --gpu-id 0
   deps:
     - path: training/cdt_ddt/model-best
-      md5: 8424957f5c209687f18edcb878684431
+      md5: 0fc33b13eccf29e5709c5e2e5357d44e
     - path: corpus/cdt_ddt/test.spacy
-      md5: 3482e823b6d17c9b733e78e055af1741
+      md5: b545a078362318c270f3a7f71da3b119
   outs:
     - path: metrics/cdt_ddt.json
-      md5: acf82475ba56c762ac09975ff2107beb
+      md5: e145d79e3e2965ba89718abff84b83f5
 package:
   cmd: python -m weasel run package
   script:
@@ -60,7 +60,7 @@ package:
       0.0.0 --force
   deps:
     - path: training/cdt_ddt/model-best
-      md5: 8424957f5c209687f18edcb878684431
+      md5: 0fc33b13eccf29e5709c5e2e5357d44e
   outs:
     - path: packages/da_cdt_ddt_dane_package-0.0.0/dist/en_cdt_ddt_dane_package-0.0.0.tar.gz
       md5: null
@@ -331,10 +331,10 @@ combine:
       md5: 2d8d318695d7e43766287a9f8e756d01
   outs:
     - path: corpus/cdt_ddt/data.spacy
-      md5: 57322311250071779b692529a3e0e391
+      md5: 0b2425036a902d49a25d033b8d5ae474
     - path: corpus/cdt_ddt/test.spacy
-      md5: 3482e823b6d17c9b733e78e055af1741
+      md5: b545a078362318c270f3a7f71da3b119
     - path: corpus/cdt_ddt/dev.spacy
-      md5: 851a6dc5b6fd878bee255ff18cf24d84
+      md5: c765348a3b98a8de600230d1ad2ceba6
     - path: corpus/cdt_ddt/train.spacy
-      md5: 5ea2eaf1327b4d3aa2e99c54fc90c015
+      md5: ffba8c8effa23d1a5583db151981cb77

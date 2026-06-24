@@ -1,4 +1,5 @@
 spacy
 thinc
 click
+conllu
 cupy-cuda13x[ctk]

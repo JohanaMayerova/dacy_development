@@ -24,6 +24,8 @@ Doc.set_extension("sent_ids", default=None)
 Doc.set_extension("conllu", default=None)
 Doc.set_extension("doc_id", default=None)
 Token.set_extension("qid", default=None)
+# added this extension to have metadata about split in ddt_dane for later split
+Doc.set_extension("split", default=None)
 
 
 def load_cdt(custom_split_ids: bool = True):
@@ -107,7 +109,7 @@ def load_dane():
     dane_path = corpus_path / "dane"
 
     # With a single file
-    # in my case I have already unzipped the file and have the spacy files in a folder
+    # in my case I have already unzipped the file in yml and have the spacy files in a folder
     dane = {}
     for split in ["train", "dev", "test"]:
         path = dane_path / f"{split}.spacy"
@@ -131,6 +133,7 @@ def add_dane_to_ddt(ddt, dane):
             # convert dane ents to ddt ents
             ents = [Span(doc, e.start, e.end, label=e.label_) for e in dane_doc.ents]
             doc.ents = ents
+            doc._.split = split
     return ddt
 
 
@@ -276,6 +279,7 @@ def add_coreference(cdt_sentences, docs):
 
 
 cdt_sentences, cdf_split_ids = load_cdt()
+# mapping of splits from cdt documents
 doc_id_to_split_mapping = {
     id_: split for split, ids in cdf_split_ids.items() for id_ in ids
 }
@@ -283,6 +287,12 @@ doc_id_to_split_mapping = {
 ddt = load_da_ddt()
 dane = load_dane()
 ddt_dane = add_dane_to_ddt(ddt, dane)
+
+sent_id_to_split_mapping = {
+    doc._.sent_id: split
+    for split in ["train", "dev", "test"]
+    for doc in ddt_dane[split]
+}
 
 # add doc_id
 sent_id_to_doc_id = {}
@@ -327,5 +337,26 @@ for split in ["train", "dev", "test"]:
         doc_bin.add(doc)
 
     save_path = corpus_path / "cdt" / f"{split}.spacy"
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    doc_bin.to_disk(save_path)
+
+# saving the splits in train, test and dev for all data together
+# it is needed to define that already previously in the code
+
+for split in ["train", "dev", "test"]:
+    doc_bin = DocBin(store_user_data=True)
+    for doc in docs:
+        if doc._.doc_id is not None and doc._.doc_id in doc_id_to_split_mapping:
+            # CDT docs first
+            _split = doc_id_to_split_mapping[doc._.doc_id]
+        elif doc._.sent_id is not None:
+            # if only DDT, fallback on DDT split
+            _split = sent_id_to_split_mapping[doc._.sent_id]
+        else:
+            continue 
+        if _split != split:
+            continue
+        doc_bin.add(doc)
+    save_path = corpus_path / "cdt_ddt" / f"{split}.spacy"
     save_path.parent.mkdir(parents=True, exist_ok=True)
     doc_bin.to_disk(save_path)

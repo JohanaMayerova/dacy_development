@@ -53,9 +53,11 @@ workflows:
     - train
     - evaluate
     - package
-  rest:
-    - preprocess_cdt
-    - combine
+    - train
+    - evaluate
+    - package
+  
+  training_only:
     - train
     - evaluate
     - package
