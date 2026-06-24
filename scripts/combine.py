@@ -288,6 +288,7 @@ ddt = load_da_ddt()
 dane = load_dane()
 ddt_dane = add_dane_to_ddt(ddt, dane)
 
+# defined similar mapping as done for cdt split
 sent_id_to_split_mapping = {
     doc._.sent_id: split
     for split in ["train", "dev", "test"]
