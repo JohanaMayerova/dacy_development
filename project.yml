@@ -24,7 +24,7 @@ vars:
   test_name: "da_ddt-ud-test"
   package_name: "cdt_ddt_dane_package"
   package_version: "0.0.0"
-  gpu: -1
+  gpu: 0
 # gpu so far is -1 (so cpu), when we figure out torch and cupy, I will change to 0
 
 # These are the directories that the project needs. The project CLI will make
