@@ -357,6 +357,7 @@ for split in ["train", "dev", "test"]:
             continue 
         if _split != split:
             continue
+        doc._.split = _split
         doc_bin.add(doc)
     save_path = corpus_path / "cdt_ddt" / f"{split}.spacy"
     save_path.parent.mkdir(parents=True, exist_ok=True)
