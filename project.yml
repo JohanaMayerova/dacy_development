@@ -18,6 +18,7 @@ vars:
   config_small: "config_small"
   lang: "da"
   treebank: "UD_Danish-DDT"
+  treebank_train: "cdt"
   cdt_ddt: "cdt_ddt"
   train_name: "da_ddt-ud-train"
   dev_name: "da_ddt-ud-dev"
@@ -209,32 +210,32 @@ commands:
       - >-
         python -m spacy train 
         configs/${vars.config_small}.cfg
-        --output training/cdt_ddt
+        --output training/${vars.treebank_train}
         --gpu-id ${vars.gpu} 
-        --paths.train corpus/cdt_ddt/train.spacy 
-        --paths.dev corpus/cdt_ddt/dev.spacy 
+        --paths.train corpus/${vars.treebank_train}/train.spacy 
+        --paths.dev corpus/${vars.treebank_train}/dev.spacy 
         --nlp.lang=${vars.lang}
     deps:
-      - "corpus/cdt_ddt/train.spacy"
-      - "corpus/cdt_ddt/dev.spacy"
+      - "corpus/${vars.treebank_train}/train.spacy"
+      - "corpus/${vars.treebank_train}/dev.spacy"
       - "configs/${vars.config_small}.cfg"
     outputs:
-      - "training/cdt_ddt/model-best"
+      - "training/${vars.treebank_train}/model-best"
 
   - name: evaluate
     help: "Evaluate on the test data and save the metrics"
     script:
       - >-
         python -m spacy evaluate 
-        ./training/cdt_ddt/model-best 
-        ./corpus/cdt_ddt/test.spacy 
-        --output ./metrics/cdt_ddt.json 
+        ./training/${vars.treebank_train}/model-best 
+        ./corpus/${vars.treebank_train}/test.spacy 
+        --output ./metrics/${vars.treebank_train}.json 
         --gpu-id ${vars.gpu}
     deps:
-      - "training/cdt_ddt/model-best"
-      - "corpus/cdt_ddt/test.spacy"
+      - "training/${vars.treebank_train}/model-best"
+      - "corpus/${vars.treebank_train}/test.spacy"
     outputs:
-      - "metrics/cdt_ddt.json"
+      - "metrics/${vars.treebank_train}.json"
 
   
 
@@ -243,12 +244,12 @@ commands:
     script:
       - >-
         python -m spacy package 
-        training/cdt_ddt/model-best packages 
+        training/${vars.treebank_train}/model-best packages 
         --name ${vars.package_name} 
         --version ${vars.package_version}
         --force
     deps:
-      - "training/cdt_ddt/model-best"
+      - "training/${vars.treebank_train}/model-best"
     outputs_no_cache:
       - "packages/${vars.lang}_${vars.package_name}-${vars.package_version}/dist/en_${vars.package_name}-${vars.package_version}.tar.gz"
 

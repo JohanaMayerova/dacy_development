@@ -125,6 +125,9 @@ def add_dane_to_ddt(ddt, dane):
     """
     Add the dane data to the ddt data
     """
+    dane_ddt_path = corpus_path / "dane_ddt"
+    dane_ddt_path.mkdir(parents=True, exist_ok=True)
+    doc_bin = DocBin(store_user_data=True)
     for split in ["train", "dev", "test"]:
         assert len(ddt[split]) == len(dane[split])
         for doc, dane_doc in zip(ddt[split], dane[split]):
@@ -134,6 +137,10 @@ def add_dane_to_ddt(ddt, dane):
             ents = [Span(doc, e.start, e.end, label=e.label_) for e in dane_doc.ents]
             doc.ents = ents
             doc._.split = split
+            doc_bin.add(doc)
+        # saving ddt_dane for comparison between cdt ddt and ddt_cdt
+        save_path = dane_ddt_path / f"{split}.spacy"
+        doc_bin.to_disk(save_path)
     return ddt
 
 
