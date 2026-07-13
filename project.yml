@@ -18,7 +18,7 @@ vars:
   config_small: "config_small"
   lang: "da"
   treebank: "UD_Danish-DDT"
-  treebank_train: "cdt"
+  treebank_train: "cdt_ddt"
   cdt_ddt: "cdt_ddt"
   train_name: "da_ddt-ud-train"
   dev_name: "da_ddt-ud-dev"
