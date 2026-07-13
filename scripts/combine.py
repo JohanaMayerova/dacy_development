@@ -127,9 +127,10 @@ def add_dane_to_ddt(ddt, dane):
     """
     dane_ddt_path = corpus_path / "dane_ddt"
     dane_ddt_path.mkdir(parents=True, exist_ok=True)
-    doc_bin = DocBin(store_user_data=True)
+    
     for split in ["train", "dev", "test"]:
         assert len(ddt[split]) == len(dane[split])
+        doc_bin = DocBin(store_user_data=True)
         for doc, dane_doc in zip(ddt[split], dane[split]):
             # assert doc.text.strip() == dane_doc.text.strip()  # white space problem
             assert len(doc) == len(dane_doc), f"{doc._.sent_id}: token count mismatch {len(doc)} vs {len(dane_doc)}"
