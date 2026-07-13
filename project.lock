@@ -36,10 +36,10 @@ train:
     - path: corpus/cdt/dev.spacy
       md5: ec1d808b5081c80a9d90440495cd3e8e
     - path: configs/config_small.cfg
-      md5: 83845df43a7b37c7ea172beab29ebac4
+      md5: 6e5d54c262a793f66dcf05817452d23b
   outs:
     - path: training/cdt/model-best
-      md5: 4c0586b4065cde4a2f2e4949c69670cc
+      md5: bcbe16d728e42538c972b5cb7a67832c
 evaluate:
   cmd: python -m weasel run evaluate
   script:
@@ -47,12 +47,12 @@ evaluate:
       ./metrics/cdt.json  --gpu-id 0
   deps:
     - path: training/cdt/model-best
-      md5: 4c0586b4065cde4a2f2e4949c69670cc
+      md5: bcbe16d728e42538c972b5cb7a67832c
     - path: corpus/cdt/test.spacy
       md5: 915d311348b8ba4d4bd30c2b5aa8ff90
   outs:
     - path: metrics/cdt.json
-      md5: 19c939fc31150705f0d75c61d073553c
+      md5: 5edc553ffd85116ab645160040418ecc
 package:
   cmd: python -m weasel run package
   script:
@@ -60,7 +60,7 @@ package:
       0.0.0 --force
   deps:
     - path: training/cdt/model-best
-      md5: 4c0586b4065cde4a2f2e4949c69670cc
+      md5: bcbe16d728e42538c972b5cb7a67832c
   outs:
     - path: packages/da_cdt_ddt_dane_package-0.0.0/dist/en_cdt_ddt_dane_package-0.0.0.tar.gz
       md5: null
@@ -333,8 +333,8 @@ combine:
     - path: corpus/cdt_ddt/data.spacy
       md5: 0b2425036a902d49a25d033b8d5ae474
     - path: corpus/cdt_ddt/test.spacy
-      md5: b545a078362318c270f3a7f71da3b119
+      md5: 2edb12c0b9d848b0d9286c2850a435ea
     - path: corpus/cdt_ddt/dev.spacy
-      md5: c765348a3b98a8de600230d1ad2ceba6
+      md5: 45860036e939ce9c830e82181a2998c4
     - path: corpus/cdt_ddt/train.spacy
-      md5: ffba8c8effa23d1a5583db151981cb77
+      md5: 847bcd38804024cc9d1e914cfcf5a899

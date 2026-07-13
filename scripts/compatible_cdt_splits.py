@@ -67,7 +67,7 @@ test_docs = []
 for s in split_ids["train"]:
     if s not in doc_ids:
         print("not in doc_ids")
-        break
+        continue
 
     if "test" in doc_ids[s]:
         test_docs.append(s)

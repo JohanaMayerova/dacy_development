@@ -131,7 +131,8 @@ def add_dane_to_ddt(ddt, dane):
     for split in ["train", "dev", "test"]:
         assert len(ddt[split]) == len(dane[split])
         for doc, dane_doc in zip(ddt[split], dane[split]):
-            # assert doc.text.strip() == dane_doc.text.strip() -- white space problem
+            # assert doc.text.strip() == dane_doc.text.strip()  # white space problem
+            assert len(doc) == len(dane_doc), f"{doc._.sent_id}: token count mismatch {len(doc)} vs {len(dane_doc)}"
             assert doc._.sent_id == dane_doc._.sent_id
             # convert dane ents to ddt ents
             ents = [Span(doc, e.start, e.end, label=e.label_) for e in dane_doc.ents]
