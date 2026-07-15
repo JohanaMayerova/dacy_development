@@ -3,3 +3,5 @@ thinc
 click
 conllu
 cupy-cuda13x[ctk]
+spacy-transformers
+spacy-experimental #needs python 3.11
