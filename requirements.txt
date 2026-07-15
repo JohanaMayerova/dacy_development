@@ -1,6 +1,15 @@
-thinc
-click
-conllu
-cupy-cuda13x[ctk]
+# had to be changed because of thinc
+# numpy<2.0
+# cupy-cuda12x>=13.0.0,<14.0.0
+# spacy
+# thinc
+# click
+# conllu
+# cupy-cuda13x[ctk]
+# spacy-transformers
+
+spacy[lookups,transformers]
 spacy-transformers
-spacy-experimental #needs python 3.11
+thinc[torch]
+conllu
+wikidata

@@ -15,7 +15,7 @@ description: >
 
 # Variables can be referenced across the project.yml using ${vars.var_name}
 vars:
-  config_small: "dacy-edge"
+  config_small: "dacy-small"
   lang: "da"
   treebank: "UD_Danish-DDT"
   treebank_train: "cdt_ddt"
@@ -23,8 +23,8 @@ vars:
   train_name: "da_ddt-ud-train"
   dev_name: "da_ddt-ud-dev"
   test_name: "da_ddt-ud-test"
-  package_name: "cdt_ddt_dane_package"
-  package_version: "0.0.0"
+  package_name: "dacy-small-1"
+  package_version: "0.0.1"
   gpu: 0
 # gpu so far is -1 (so cpu), when we figure out torch and cupy, I will change to 0
 
@@ -51,9 +51,6 @@ workflows:
     - preprocess_dane
     - preprocess_cdt
     - combine
-    - train
-    - evaluate
-    - package
     - train
     - evaluate
     - package
