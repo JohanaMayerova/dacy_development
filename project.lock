@@ -36,10 +36,10 @@ train:
     - path: corpus/cdt_ddt/dev.spacy
       md5: 45860036e939ce9c830e82181a2998c4
     - path: configs/dacy-medium.cfg
-      md5: e19795d7566a9d210cbaa98fd488a18c
+      md5: 6f6f4a7573aa246f2cadfb0856a45c2f
   outs:
     - path: training/cdt_ddt/model-best
-      md5: 8773c9874f67f1aa7023300770f0e237
+      md5: d81bd15e92b3408a31a2b9745b6d4d7d
 evaluate:
   cmd: python -m weasel run evaluate
   script:
@@ -47,12 +47,12 @@ evaluate:
       ./metrics/cdt_ddt.json  --gpu-id 0
   deps:
     - path: training/cdt_ddt/model-best
-      md5: 8773c9874f67f1aa7023300770f0e237
+      md5: d81bd15e92b3408a31a2b9745b6d4d7d
     - path: corpus/cdt_ddt/test.spacy
       md5: 2edb12c0b9d848b0d9286c2850a435ea
   outs:
     - path: metrics/cdt_ddt.json
-      md5: e5cc36dc877a3fc39f701d71ea505f9b
+      md5: 180b0b7a016787c501d217d8cc850e7f
 package:
   cmd: python -m weasel run package
   script:
