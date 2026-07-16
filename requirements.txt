@@ -10,6 +10,6 @@
 
 spacy[lookups,transformers]
 spacy-transformers
-thinc[torch]
-conllu
-wikidata
+cupy-cuda13x[ctk]
+click
+

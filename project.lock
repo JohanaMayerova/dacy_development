@@ -28,18 +28,18 @@ preprocess:
 train:
   cmd: python -m weasel run train
   script:
-    - python -m spacy train  configs/dacy-small.cfg --output training/cdt_ddt --gpu-id
+    - python -m spacy train  configs/dacy-medium.cfg --output training/cdt_ddt --gpu-id
       0  --paths.train corpus/cdt_ddt/train.spacy  --paths.dev corpus/cdt_ddt/dev.spacy  --nlp.lang=da
   deps:
     - path: corpus/cdt_ddt/train.spacy
       md5: 847bcd38804024cc9d1e914cfcf5a899
     - path: corpus/cdt_ddt/dev.spacy
       md5: 45860036e939ce9c830e82181a2998c4
-    - path: configs/dacy-small.cfg
-      md5: 2a41bd5b88e152f36978803628191528
+    - path: configs/dacy-medium.cfg
+      md5: e19795d7566a9d210cbaa98fd488a18c
   outs:
     - path: training/cdt_ddt/model-best
-      md5: bd3ab40c92b3053ae248e67bff301361
+      md5: 8773c9874f67f1aa7023300770f0e237
 evaluate:
   cmd: python -m weasel run evaluate
   script:
@@ -47,12 +47,12 @@ evaluate:
       ./metrics/cdt_ddt.json  --gpu-id 0
   deps:
     - path: training/cdt_ddt/model-best
-      md5: bd3ab40c92b3053ae248e67bff301361
+      md5: 8773c9874f67f1aa7023300770f0e237
     - path: corpus/cdt_ddt/test.spacy
       md5: 2edb12c0b9d848b0d9286c2850a435ea
   outs:
     - path: metrics/cdt_ddt.json
-      md5: 7bb129c33291c87526463f33b46c2b2c
+      md5: e5cc36dc877a3fc39f701d71ea505f9b
 package:
   cmd: python -m weasel run package
   script:
