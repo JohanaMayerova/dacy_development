@@ -15,7 +15,7 @@ description: >
 
 # Variables can be referenced across the project.yml using ${vars.var_name}
 vars:
-  config_small: "dacy-medium"
+  config_small: "dacy-large"
   lang: "da"
   treebank: "UD_Danish-DDT"
   treebank_train: "cdt_ddt"
@@ -23,7 +23,7 @@ vars:
   train_name: "da_ddt-ud-train"
   dev_name: "da_ddt-ud-dev"
   test_name: "da_ddt-ud-test"
-  package_name: "dacy_medium"
+  package_name: "dacy_large"
   package_version: "0.0.1"
   gpu: 0
 
