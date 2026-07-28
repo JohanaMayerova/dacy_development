@@ -39,7 +39,7 @@ train:
       md5: ca1f97873d4148cb43dfebc0d6de8e2a
   outs:
     - path: training/cdt_ddt/model-best
-      md5: 859b99482351ba7dad4819b749a0836f
+      md5: 97568aac9aa3e54dc208d3f28c9fc77b
 evaluate:
   cmd: python -m weasel run evaluate
   script:
@@ -47,12 +47,12 @@ evaluate:
       ./metrics/cdt_ddt.json  --gpu-id 0
   deps:
     - path: training/cdt_ddt/model-best
-      md5: 859b99482351ba7dad4819b749a0836f
+      md5: 97568aac9aa3e54dc208d3f28c9fc77b
     - path: corpus/cdt_ddt/test.spacy
       md5: 2edb12c0b9d848b0d9286c2850a435ea
   outs:
     - path: metrics/cdt_ddt.json
-      md5: 0e1f5ebe79311751706eab58c003b32a
+      md5: e47f4676baa8e28b4f156f4f30715ca4
 package:
   cmd: python -m weasel run package
   script:
@@ -60,7 +60,7 @@ package:
       0.0.3 --force
   deps:
     - path: training/cdt_ddt/model-best
-      md5: 859b99482351ba7dad4819b749a0836f
+      md5: 97568aac9aa3e54dc208d3f28c9fc77b
   outs:
     - path: packages/da_tiny_cdt_ddt-0.0.3/dist/en_tiny_cdt_ddt-0.0.3.tar.gz
       md5: null
