@@ -15,7 +15,7 @@ description: >
 
 # Variables can be referenced across the project.yml using ${vars.var_name}
 vars:
-  config_small: "dacy-medium"
+  config_small: "dacy-tiny"
   lang: "da"
   treebank: "UD_Danish-DDT"
   treebank_train: "cdt_ddt"
@@ -23,7 +23,7 @@ vars:
   train_name: "da_ddt-ud-train"
   dev_name: "da_ddt-ud-dev"
   test_name: "da_ddt-ud-test"
-  package_name: "dacy_medium"
+  package_name: "tiny_cdt_ddt"
   package_version: "0.0.3"
   gpu: 0
 
@@ -41,6 +41,9 @@ assets:
     url: "http://danlp-downloads.alexandra.dk/datasets/ddt.zip"
   - dest: "assets/dacoref.zip"
     url: "http://danlp-downloads.alexandra.dk/datasets/dacoref.zip"
+  - dest: "assets/angry_tweets.zip"
+    url: "https://danlp-downloads.alexandra.dk/datasets/game_tweets.zip"
+
 
 workflows:
   all:
@@ -58,9 +61,21 @@ workflows:
     - train
     - evaluate
     - package
+  
+  preprocessing_sentiment:
+  - preprocess_sentiment
+  
 
 commands:
-
+  - name: preprocess_sentiment
+    help: "Preprocess the angry tweets dataset"
+    script:
+      - "unzip assets/angry_tweets.zip -d assets/angry_tweets"
+      # - "rm assets/angry_tweets.zip"
+    deps:
+      - "assets/angry_tweets.zip"
+    outputs:
+      - "assets/angry_tweets/angry_tweets.csv"
   # unzipping DaNe 
   - name: prepare_dane
     help: "Prepare DaNE data for preprocessing"

@@ -28,18 +28,18 @@ preprocess:
 train:
   cmd: python -m weasel run train
   script:
-    - python -m spacy train  configs/dacy-medium.cfg --output training/cdt_ddt --gpu-id
+    - python -m spacy train  configs/dacy-tiny.cfg --output training/cdt_ddt --gpu-id
       0  --paths.train corpus/cdt_ddt/train.spacy  --paths.dev corpus/cdt_ddt/dev.spacy  --nlp.lang=da
   deps:
     - path: corpus/cdt_ddt/train.spacy
       md5: 847bcd38804024cc9d1e914cfcf5a899
     - path: corpus/cdt_ddt/dev.spacy
       md5: 45860036e939ce9c830e82181a2998c4
-    - path: configs/dacy-medium.cfg
-      md5: bdfef08d1e5f0a18908e18d5873cd151
+    - path: configs/dacy-tiny.cfg
+      md5: ca1f97873d4148cb43dfebc0d6de8e2a
   outs:
     - path: training/cdt_ddt/model-best
-      md5: bc241e873ba51f9a344c1c6a59650b30
+      md5: 859b99482351ba7dad4819b749a0836f
 evaluate:
   cmd: python -m weasel run evaluate
   script:
@@ -47,22 +47,22 @@ evaluate:
       ./metrics/cdt_ddt.json  --gpu-id 0
   deps:
     - path: training/cdt_ddt/model-best
-      md5: bc241e873ba51f9a344c1c6a59650b30
+      md5: 859b99482351ba7dad4819b749a0836f
     - path: corpus/cdt_ddt/test.spacy
       md5: 2edb12c0b9d848b0d9286c2850a435ea
   outs:
     - path: metrics/cdt_ddt.json
-      md5: 5a45be030726b69e563f7adbfdbd0de3
+      md5: 0e1f5ebe79311751706eab58c003b32a
 package:
   cmd: python -m weasel run package
   script:
-    - python -m spacy package  training/cdt_ddt/model-best packages  --name dacy_medium  --version
+    - python -m spacy package  training/cdt_ddt/model-best packages  --name tiny_cdt_ddt  --version
       0.0.3 --force
   deps:
     - path: training/cdt_ddt/model-best
-      md5: bc241e873ba51f9a344c1c6a59650b30
+      md5: 859b99482351ba7dad4819b749a0836f
   outs:
-    - path: packages/da_dacy_medium-0.0.3/dist/en_dacy_medium-0.0.3.tar.gz
+    - path: packages/da_tiny_cdt_ddt-0.0.3/dist/en_tiny_cdt_ddt-0.0.3.tar.gz
       md5: null
 preprocess_ner:
   cmd: python -m weasel run preprocess_ner
@@ -338,3 +338,16 @@ combine:
       md5: 45860036e939ce9c830e82181a2998c4
     - path: corpus/cdt_ddt/train.spacy
       md5: 847bcd38804024cc9d1e914cfcf5a899
+preprocess_sentiment:
+  cmd: python -m weasel run preprocess_sentiment
+  script:
+    - unzip assets/angry_tweets.zip -d assets/angry_tweets
+    - rm assets/dacoref.zip
+  deps:
+    - path: assets/dacoref.zip
+      md5: null
+  outs:
+    - path: assets/angry_tweets/train.conllu
+      md5: null
+    - path: assets/angry_tweets/test.conllu
+      md5: null
