@@ -98,6 +98,7 @@ def load_da_ddt():
         docs = [e.reference for e in examples]
         ddt[split] = docs
         _add_sent_id(docs, split, diff="da_ddt-ud-", dataset="UD_Danish-DDT")
+    print(len(ddt["train"]) + len(ddt["dev"]) + len(ddt["test"]))
     return ddt
 
 
@@ -368,6 +369,8 @@ for split in ["train", "dev", "test"]:
             continue
         doc._.split = _split
         doc_bin.add(doc)
+
+    print(f"{split}: {len(doc_bin)} docs")
     save_path = corpus_path / "cdt_ddt" / f"{split}.spacy"
     save_path.parent.mkdir(parents=True, exist_ok=True)
     doc_bin.to_disk(save_path)
